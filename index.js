@@ -25,6 +25,7 @@ const prepareFile = async (url) => {
   let ext = path.extname(url)
   const isFile = !(ext === '')
   let filePath = isFile ? path.join(LOCAL_PATH, url) : path.join(LOCAL_PATH, 'index.html')
+  console.log(LOCAL_PATH)
   console.log('File path', filePath)
   switch (url) {
     case /^api\/.+$/g.test(url):
@@ -32,7 +33,6 @@ const prepareFile = async (url) => {
       const data = nodeAPI.get(url)
       return { isApi: true, data: data }
   }
-  console.log('Path', filePath)
   const pathTraversal = !filePath.startsWith(LOCAL_PATH);
   const exists = await fs.promises.access(filePath).then(...toBool);
   const found = !pathTraversal && exists;

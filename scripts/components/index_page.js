@@ -1,9 +1,13 @@
 import createEl from "../util/nodes.js";
-
+import { pushTextState } from "./states/states.js";
 
 const e = createEl
-export default function Index() {
-  console.log('rendering')
+export default function Index({ params }) {
+  const url = new URL(document.URL)
+  let currentTab = url.pathname
+  console.log('url:', currentTab)
+  console.log('params', params)
+  let state = { fileName: '' }
 
   const container = e('div', { class: "container", id: "index-container" })
   const title = e('h1',)
@@ -22,13 +26,12 @@ export default function Index() {
   p4.innerHTML = 'This application is designed to help you with managing files that are stored with cloud storage services (etc. google drive or yandex disk).'
   const navBar = e('div', { id: "index-navbar" })
   const navLink1 = e('div', { id: "nav-link-1", class: "nav-link" })
-  navLink1.innerHTML = "How it work"
+  navLink1.innerHTML = "How it works"
   const navLink2 = e('div', { id: "nav-link-1", class: "nav-link" })
   navLink2.innerHTML = "Preview"
   const navLink3 = e('div', { id: "nav-link-1", class: "nav-link" })
   navLink3.innerHTML = "Github"
-  const textBlock1Content = 'how it works'
-  console.log(textBlock1Content)
+  const textBlock1Content = '---'
   const textBlock1 = e('div', { id: 'text-block-1', class: 'text-block' })
   textBlock1.innerHTML = textBlock1Content
 
@@ -42,18 +45,27 @@ export default function Index() {
   navLink2.addEventListener('click', async (e) => navOnClick(e, 'preview'))
   navBar.appendChild(navLink3)
   navLink3.addEventListener('click', async (e) => navOnClick(e, 'github'))
+  history.replaceState({ description: '', text: textBlock1Content, name: '' }, '', document.location.href)
+  window.addEventListener('popstate', (event) => {
+    event.preventDefault()
+    console.log('popstate', window.history)
+    displayState(event.state)
+  })
 
+  function displayState({ description, name, text }) {
+    textBlock1.innerHTML = text
+  }
   async function navOnClick(e, url) {
-    fetch(`/scripts/components/texts/${url}.txt`).then((response) => {
-      console.log(response)
+    const text = await fetch(`/scripts/components/texts/${url}.txt`).then((response) => {
       if (!response.ok) {
         console.log(response)
-        return { status: 404, message: 'Not found' }
       } else return response.text()
     }).then(response => {
-      console.log(response)
-      textBlock1.innerHTML = response
+      return response
     })
+    textBlock1.innerHTML = text
+    const path = currentTab
+    pushTextState(path, url, 'text for index page tab block', text)
 
   }
 
